@@ -1,0 +1,735 @@
+\documentclass[a4paper, 12pt, oneside]{amsart}
+
+%%%%%% Packages %%%%%%
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+%%%%% Style Settings %%%%%
+% Hyperlinks
+\definecolor{indigo}{rgb}{0.0, 0.25, 0.42}
+\hypersetup{
+    colorlinks=true, 
+    linkcolor=indigo,
+    urlcolor=indigo,
+    filecolor=indigo,
+    citecolor=indigo,
+    linktoc=all,
+    bookmarksnumbered=true,
+}
+
+% page style
+\usepackage[scale=0.8]{geometry}
+\linespread{1.1}
+\pagestyle{plain}
+\addtolength{\footskip}{\baselineskip}
+\addtolength{\textheight}{-\baselineskip}
+
+% lists
+\usepackage[shortlabels, inline]{enumitem}
+\setenumerate{label=(\alph*), nosep}
+
+% footnotes & captions
+\usepackage[perpage, stable, flushmargin]{footmisc}
+\usepackage[font=small, labelfont={bf}]{caption}
+
+%%%%% Theorem Environment & Numbering %%%%%
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem*{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+% \numberwithin{equation}{section}
+
+%%%%% math commands %%%%%
+% Operators
+\let\Re\relax\DeclareMathOperator{\Re}{Re}
+\let\Im\relax\DeclareMathOperator{\Im}{Im}
+\let\div\relax\DeclareMathOperator{\div}{div}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\spt}{spt}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator*{\esssup}{ess\,sup}
+
+% Symbols
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bk}[2]{\left\langle #1,\, #2 \right\rangle}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\renewcommand{\mid}{:\,}
+\newcommand{\eval}[2]{\left.{#1}\right\rvert_{#2}}    % evaluation (a vertical line)
+\newcommand{\at}{\left.\vphantom{\int}\right\rvert}     % evaluation (a vertical line)
+\renewcommand{\d}{\mathop{}\!d}    % d in the integral (with proper spacing)
+\newcommand{\dx}{\mathop{}\!dx}
+\newcommand{\dy}{\mathop{}\!dy}
+\newcommand{\dz}{\mathop{}\!dz}
+\newcommand{\dt}{\mathop{}\!dt}
+\newcommand{\dd}[2]{\frac{d{#1}}{d{#2}}}
+\newcommand{\pd}[2]{\frac{\partial{#1}}{\partial{#2}}}
+\newcommand{\ipd}[2]{\partial{#1}/\partial{#2}}    % inline partial derivative
+\newcommand{\covin}[1]{\ \text{in}\ {#1}}
+\newcommand{\id}{\text{id}}    % identity map
+
+% Alias (short version of existing commands)
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\newcommand{\f}[2]{\frac{#1}{#2}}
+\newcommand{\p}{\partial}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\ol}[1]{\overline{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\mb}[1]{\mathbb{#1}}
+\newcommand{\ms}[1]{\mathscr{#1}}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\sm}{\setminus}
+\newcommand{\ls}{\lesssim}
+\newcommand{\gs}{\gtrsim}
+\renewcommand{\emptyset}{\varnothing}
+\newcommand{\iso}{\cong}
+\newcommand{\laplace}{\triangle}
+\newcommand{\wto}{\rightharpoonup}
+
+% Letters
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\e}{\varepsilon}
+\newcommand{\vp}{\varphi}
+
+
+\begin{document}
+
+\title{Existence of Weak Solutions to the Three-dimensional Navier--Stokes Equations}
+\author{Keyuan Huang\footnote{Email: Keyuan.Huang@outlook.com}}
+% \date{January 6, 2022}
+\begin{abstract}
+The purpose of this note is to give a self--contained presentation of the proof of the existence of weak solutions to the three-dimensional Navier--Stokes equations, using the Galerkin method. The main reference for this note is \cite{robinson2016three}.
+\end{abstract}
+\maketitle
+
+\section*{Notation}
+
+Throughout this note, all function spaces are assumed to be real-valued. We will fix $\Omega\subset\R^3$ to be a bounded domain with a smooth boundary. 
+When we refer to spaces of functions on $\Omega$, we will usually omit the letter $\Omega$ in our notations; for example, we will simply write $L^p$ for $L^p(\Omega)$. 
+When we refer to $L^2$ norm, we will usually drop the subscript, writing $\norm{\cdot}$ for $\norm{\cdot}_{L^2(\Omega)}$. 
+The bracket notation $\bk{\cdot}{\cdot}$ means the real inner product in $L^2(\Omega)$.
+
+\section{Weak formulation}
+
+The initial and boundary problem of the Navier--Stokes equations is formulated as
+\begin{equation}
+    \label{eq: NS}
+    \begin{cases}
+        \p_t u - \laplace u + (u\cdot\nabla)u + \nabla p = 0&\text{in $[0, T]\times\Omega$},\\
+        \div u = 0&\text{in $[0, T]\times\Omega$},\\
+        u = 0&\text{on $[0, T]\times\p\Omega$},\\
+        u(0) = u_0&\text{in $\Omega$},
+    \end{cases}
+\end{equation}
+where $u_0:\Omega\to\R^3$ is a given vector field. We will solve for the velocity $u:[0, T]\times\Omega\to\R^3$ and the pressure $p:[0, T]\times\Omega\to\R$.
+
+In this section, we will deduce a weak formulation for \eqref{eq: NS}. Notice that if a vector field $\phi$ is divergence-free, by integration by parts we can get
+\[
+    \bk{\nabla p}{\phi} = -\bk{p}{\div\phi} = 0.
+\]
+So by applying divergence-free test functions, we can temporarily get rid of the pressure $p$. Thus, a nice space for the test functions to live in would be
+\begin{equation}
+    \label{eq: div-free test functions}
+    \mc{D}_\sigma(\Omega) = \set{\phi\in C_c^\infty([0, \infty)\times\Omega)^3\mid \div\phi(t) = 0\ \text{for all $t
+    \geq 0$}}.
+\end{equation}
+Let $\phi\in\mc{D}_\sigma$, and multiply the first equation of \eqref{eq: NS} by $\phi$ and integrate in space, we get
+\[
+    \bk{\p_t u}{\phi} + \bk{\nabla u}{\nabla\phi} + \bk{(u\cdot\nabla)u}{\phi} = 0.
+\]
+Then integrate in time from 0 to $s$, we get
+\begin{equation}
+    \label{eq: NS, weak form}
+    -\int_0^s\bk{u}{\p_t\phi} + \int_0^s\bk{\nabla u}{\nabla\phi} + \int_0^s \bk{(u\cdot\nabla)u}{\phi} = \bk{u_0}{\phi(0)} - \bk{u(s)}{\phi(s)}.
+\end{equation}
+The equation \eqref{eq: NS, weak form} could be considered as a weak form of the Navier--Stokes equations \eqref{eq: NS}.
+
+Next, We should determine a suitable space for the weak solutions to live in. Let
+\begin{align*}
+    &C^\infty_{c,\sigma}(\Omega) = \set{\phi\in (C_c^\infty(\Omega))^3\mid\div\phi=0},\\
+    &H(\Omega) = \text{The closure of $C^\infty_{c,\sigma}(\Omega)$ in $(L^2(\Omega))^3$},\\
+    &V(\Omega) = H(\Omega)\cap (H^1_0(\Omega))^3;
+\end{align*}
+here $V(\Omega)$ could be considered as the space of divergence-free functions that vanish on the boundary (in the weak sense). Hence, it's natural to require $u(t)\in V(\Omega)$ for a.e. $t>0$.
+
+For physical considerations, the weak solutions should also satisfy that for all $T>0$, 
+\[
+    \esssup_{0\leq t\leq T}\norm{u(t)} < \infty,\quad \int_{0}^T\norm{\nabla u(s)}^2\ds<\infty.
+\]
+Hence, we can conclude that the weak solutions should live in
+\[
+    L^\infty(0, T; H)\cap L^2(0, T; V)
+\]
+for all $T>0$. Here we impose $L^2$ norm on $H$ and $H_0^1$ norm on $V$ (i.e. $\norm{u}_V=\norm{\nabla u}$).
+
+\begin{definition}
+    A function $u$ is called a \textbf{weak solution} of the Navier--Stokes equations \eqref{eq: NS} with initial condition $u_0\in H$, if
+    \begin{enumerate}
+        \item $u\in L^\infty(0, T; H)\cap L^2(0, T; V)$ for all $T>0$;
+        \item For all  $\phi\in\mc{D}_\sigma$ and a.e. $s>0$, the equation \eqref{eq: NS, weak form} holds. Here $\mc{D}_\sigma$ is given by \eqref{eq: div-free test functions}.
+    \end{enumerate}
+\end{definition}
+
+\section{Helmholtz--Weyl decomposition}
+
+Let $u\in (L^2)^3$, and $n$ be the outer normal vector field on $\p\Omega$. When $\div u\in L^2$, normal component $u\cdot n$ of $u$ could be defined as a linear functional acting on the trace of  $H^1$ functions, by a weak form of Gauss formula
+\[
+    \bk{u\cdot n}{v}_{\p\Omega} := \bk{\div u}{v} + \bk{u}{\nabla v},\quad\forall v\in H^1(\Omega).
+\]
+In this sense, we have the following characterization of the space $H$.
+
+\begin{lemma}
+    For $u\in (L^2)^3$, we have
+    \[
+    u\in H\iff \div u = 0\ \text{in $\Omega$},\ u\cdot n=0\ \text{on $\p\Omega$}.
+\]
+\end{lemma}
+
+\begin{remark}
+    A function in $H$ is divergence-free and has a zero normal component, but is not necessarily vanish on the boundary.
+\end{remark}
+
+\begin{theorem}[Helmholtz--Weyl]
+    The orthogonal complement of $H$ in $(L^2)^3$ is
+    \[
+        G:=\set{\nabla h\mid h\in H^1}.
+    \]
+\end{theorem}
+
+\begin{proof}
+    By integration by parts, we have $\bk{\phi}{\nabla g}=0$ for all $\phi\in C_{c, \sigma}^\infty$ and $g\in H^1$. Then by using the fact that $C_{c, \sigma}^\infty$ is dense in $H$, we conclude that $G$ and $H$ are orthogonal to each other.
+    
+    Suppose $u\in (L^2)^3$. Since $\div u\in H^{-1}$, by the knowledge of the Poisson equation, the weak form of the Dirichlet problem
+    \[
+        \begin{cases}
+            \laplace h = \div u\quad\text{in $\Omega$};\\
+            h = 0\quad\text{on $\p\Omega$}
+        \end{cases}
+    \]
+    is well-posed. The weak solution $h$ will live in $H^1(\Omega)$. Let
+    \[
+        v = u - \nabla h,
+    \]
+    then $v$ is divergence-free. But we do not necessarily have $v\cdot n=0$ on $\p\Omega$. To handle this issue, take $w\in H^1(\Omega)$ be the weak solution to the Neumann problem 
+    \[
+        \begin{cases}
+            \laplace w = 0\quad\text{in $\Omega$};\\
+            \p w/\p n = v\cdot n\quad\text{on $\p\Omega$}.
+        \end{cases}
+    \]
+    Then $v-\nabla w$ is divergence-free. Thus, we have
+    \[
+        u = \nabla(h+w) + (v-\nabla w),
+    \]
+    which is the desiring decomposition.
+\end{proof}
+
+\begin{definition}
+    Let $\mb{P}: (L^2)^3\to H$ denote the orthogonal projection onto $H$, i.e.
+    \[
+        \mb{P}u = v\iff u = v + \nabla h\ \text{for some $h\in H^1$}.
+    \]
+    Projection $\mb{P}$ is called the \textbf{Leray operator}.
+\end{definition}
+
+\begin{proposition}
+    $\mb{P}: (L^2)^3\to H\subset (L^2)^3$ is self-adjoint, i.e.
+    \[
+        \bk{\mb{P}u}{v} = \bk{u}{\mb{P}v}\quad\text{for all $u, v\in (L^2)^3$}.
+    \]
+\end{proposition}
+
+\begin{proof}
+    Easy computation using the definition.
+\end{proof}
+
+If we apply $\mb{P}$ on both sides of the Navier--Stokes equation
+\[
+    \p_t u - \laplace u + (u\cdot\nabla)u + \nabla p = 0,
+\]
+where $u\in H$, we can get rid of pressure $p$ and get the projected version of Navier--Stokes equation:
+\begin{equation}
+    \label{eq: projected NS}
+    \p_t u - \mb{P}\laplace u + \mb{P}[(u\cdot\nabla) u] = 0.
+\end{equation}
+Equation \eqref{eq: projected NS} is a nice simplification to the original problem when we only care about the velocity field $u$ in the Navier--Stokes equations.
+% Later we will see from the Galerkin method (section \eqref{sec: Galerkin}), this way of getting rid of the pressure coincides with the way we did before by taking divergence-free test functions.
+
+\section{The Stokes equation and Stokes operator}
+
+Next, we study the linear term $-\mb{P}\laplace u$ in \eqref{eq: projected NS}.
+
+\begin{definition}
+    The \textbf{Stokes operator} $A$ is defined by
+    \[
+        Au = -\mb{P}\laplace u\quad\text{for all $u\in D(A) := V \cap (H^2)^3.$}
+    \]
+\end{definition}
+
+By the definition of Leray projector, functions $u\in D(A)$ and $f\in H$ satisfy $Au=f$ if and only if
+\begin{equation}
+    \label{eq: Stokes}
+    -\laplace u + \nabla p = f\quad \text{for some $p\in H^1$}.
+\end{equation}
+The equation \eqref{eq: Stokes} is called \textbf{Stokes equation}, which could be viewed as the stationary linearized version of Navier--Stokes equation. Multiply \eqref{eq: Stokes} by $v\in V$ and integrate by parts, we can deduce the weak form of the Stokes equation:
+\begin{equation}
+    \label{eq: weak Stokes}
+    \bk{\nabla u}{\nabla v} = \bk{f}{v}\quad\text{for all $v\in V$}.
+\end{equation}
+
+\begin{lemma}[existence and uniqueness of weak solutions]
+    For every $f\in V^*$, there is a unique $u\in V$ satisfies \eqref{eq: weak Stokes}.
+\end{lemma}
+
+\begin{proof}
+We try to apply the Lax-Milgram theorem. Consider the bilinear functional
+\[
+    h: (u, v)\in V\times V\mapsto\bk{\nabla u}{\nabla v}.
+\]
+Clearly
+\[
+    \abs{h(u, v)} = \abs{\bk{\nabla u}{\nabla v}} \leq C\norm{\nabla u}\norm{\nabla v} = C\norm{u}_V\norm{v}_V
+\]
+so $h: V\times V\to\R$ is bounded. Moreover,
+\[
+    h(u, u) = \norm{\nabla u}^2 = \norm{u}_V^2,
+\]
+Hence by the Lax-Milgram theorem, we can finish the proof.
+\end{proof}
+
+\begin{lemma}[regularity of weak solutions]
+    \label{lemma: regularity of Stokes equations}
+    Suppose $f\in L^2$ and $u\in V$ satisfies \eqref{eq: weak Stokes}, then $u\in H^2$ and $Au=f$. 
+\end{lemma}
+
+\begin{proof}
+    Note that the weak form \ref{eq: weak Stokes} is a high-dimension analog of the weak form of the Laplace equation; by the standard techniques in elliptic PDE theory, one can prove $u\in H^2$. These standard techniques can be found in many textbooks, such as chapter 6 of \cite{evans2010partial}. 
+
+    By $u\in H^2$ we can integrate by parts in \eqref{eq: weak Stokes}, and conclude that $f+\laplace u$ is $L^2$-orthogonal to $V$. Since $V$ is dense in $H$, by Helmholtz--Weyl decomposition we see $f+\laplace u\in G$, which means $u$ is also strong solution to Stokes equation \ref{eq: Stokes} and hence $Au=f$.
+\end{proof}
+
+\begin{proposition}
+    The Stokes operator $A$ satisfies the following properties.
+    \begin{enumerate}
+        \item $A: D(A)\to H$ is bijective.
+        \item $A^{-1}: H\to D(A)\subset H$ is self-adjoint and positive.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    By lemma \ref{lemma: regularity of Stokes equations} and $H\subset V^*$, clearly $A$ is surjective.
+    Next, we prove $A$ is injective by showing its null space is trivial. Suppose $Au=0$ for some $u\in D(A)$, then there exists $p\in H^1$ s.t. $-\laplace u + \nabla p = 0$. Multiply this equation by $u$ and integrate by parts, we get $\norm{\nabla u}^2=0$, hence $u=0$. Therefore, (a) is true.
+
+    Suppose $Au=f$ and $Av=g$ for $u, v\in D(A)$, by \ref{eq: weak Stokes} we have
+    \[
+        \bk{g}{A^{-1}f} = \bk{g}{u} = \bk{\nabla v}{\nabla u} = \bk{v}{f} = \bk{A^{-1}g}{f},
+    \]
+    so $A^{-1}$ is self-adjoint. By taking $u=v$, one gets
+    \[
+        0\leq \bk{\nabla u}{\nabla u} = \bk{f}{u} = \bk{f}{A^{-1}f},
+    \]
+    hence $A^{-1}$ is positive.
+\end{proof}
+
+\begin{theorem}
+    (a) The Stokes operator $A$ has a sequence of eigenvalues
+    \[
+        0<\lambda_1\leq\lambda_2\leq\cdots\quad\text{s.t. } \lambda_j\to\infty\ (j\to\infty),
+    \]
+    and corresponding eigenfunctions $a_j\in H$ s.t. $\set{a_j}$ is an orthonormal Schauder basis of $H$. 
+    
+    (b) Moreover, $\set{a_j}$ is also an orthogonal Schauder basis of $V$, and $\norm{a_j}_V=\lambda_j^{1/2}$.
+
+    (c) All the $a_j$'s belong to $C^\infty(\ol{\Omega})$.
+\end{theorem}
+
+\begin{proof}
+    The Sobolev embedding $H^1\subset\subset L^2$ implies that $D(A)\subset\subset H$. Therefore, $A^{-1}: H\to H$ is a compact operator. Moreover, one can check that $A^{-1}$ is self-adjoint and positive, therefore by spectral theorem, $H$ has an orthonormal basis $\set{a_j}$ consisting of eigenfunctions of $A^{-1}$, where all the corresponding eigenvalues are a positive sequence descending to zero. These $a_j$'s are also eigenfunctions of $A$, and the corresponding eigenvalues are a sequence increasing to infinity. Hence, we conclude that (a) is true.
+
+    Next, notice that
+    \begin{align*}
+        \bk{a_j}{a_k}_V &= \bk{\nabla a_j}{a_k} = -\bk{a_j}{\laplace a_k} = -\bk{\mb{P}a_j}{\laplace a_k} \\
+        &= \bk{a_j}{-\mb{P}\laplace a_k} = \bk{a_j}{Aa_k} = \lambda_k\bk{a_j}{a_k}.
+    \end{align*}
+    Then by the $L^2$ orthogonality, we can prove (b).
+    
+    To prove (c), one can make use of lemma \ref{lemma: regularity of Stokes equations} and apply a bootstrapping argument. This is also standard in elliptic PDE theory. For details, one can refer to chapter 6 of \cite{evans2010partial}. 
+\end{proof}
+
+\section{Alternative space for test functions}
+
+Next, we will show that the eigenfunctions of the Stokes operator can be used to construct a more convenient space of test functions. Let
+\[
+    \tilde{\mc{D}}_\sigma = \set{\phi\mid \phi(t, x) = \sum_{k=1}^nc_k(t)a_k(x),\ c_k\in C_c^1([0, \infty),\ n\in\N},
+\]
+where $\set{a_j}$ is the eigenfunctions of the Stokes operator which is also an orthonormal Schauder basis of $H$ and $V$.
+
+\begin{theorem}
+    \label{thm: equiv def of weak sol}
+    Suppose $u\in L^\infty(0, T; H)\cap L^2(0, T; V)$ for all $T>0$, $u_0\in H$, then the following statements are equivalent:
+    \begin{enumerate}
+        \item $u$ satisfy \eqref{eq: NS, weak form} for all $\phi\in\mc{D}_\sigma$.
+        \item $u$ satisfy \eqref{eq: NS, weak form} for all $\phi\in\tilde{\mc{D}}_\sigma$.
+    \end{enumerate}
+\end{theorem}
+
+To prove the theorem \ref{thm: equiv def of weak sol}, we first need a lemma to estimate the nonlinear term.
+
+\begin{lemma}
+    \label{lemma: nonlinear term estimate}
+    If $u\in L^\infty(0, T; L^2)\cap L^2(0, T; H^1)$, then
+    \[
+        (u\cdot\nabla)u\in L^{4/3}(0, T; L^{6/5}).
+    \]
+\end{lemma}
+
+\begin{proof}
+    Note that $5/6=1/2+1/3$, so by H\"older inequality we have
+    \[
+        \norm{(u\cdot\nabla)u}_{L^{6/5}}\leq\norm{u}_{L^3}\norm{\nabla u}_{L^2}.
+    \]
+    Then by the Lebesgue interpolation
+    \[
+        \norm{u}_{L^3}\leq\norm{u}_{L^2}^{1/2}\norm{u}_{L^6}^{1/2},
+    \]
+    and the Sobolev embedding $H^1\hookrightarrow L^6$, we conclude that
+    \[
+        \norm{(u\cdot\nabla)u}_{L^{6/5}}\leq C\norm{u}_{H^1}^{3/2}\norm{u}_{L^2}^{1/2}.
+    \]
+    Hence,
+    \[
+        \int_0^T\norm{(u\cdot\nabla)u}_{L^{6/5}}^{4/3}\leq C\int_0^T\norm{u}_{H^1}^2\norm{u}_{L^2}^{2/3}\leq C\norm{u}_{L^\infty(0, T; L^2)}^{2/3}\norm{u}_{L^2(0, T; H^1)} <\infty.
+    \]
+\end{proof}
+
+\begin{proof}[Proof of theroem \ref{thm: equiv def of weak sol}]
+    First, we assume (a) is true and prove (b). It suffices to show that $u$ satisfy \eqref{eq: NS, weak form} for every $\phi$ of the form $\phi(t, x):=c(t)\alpha(x)$, where $c\in C_c^1([0, \infty)),\ \alpha\in\set{a_j}$.
+
+    By mollifying, we can find $c_n\in C_c^\infty([0, s+1])$ s.t.
+    \[
+        c_n\to c\ \text{and}\ c_n'\to c_n'\quad\text{uniformly on $[0, s]$}.
+    \]
+    Using the density of $C_{c, \sigma}^\infty$ in $V$, we can find $\alpha_n\in C_{c, \sigma}^\infty$ s.t.
+    \[
+        \alpha_n\to \alpha\quad\text{in $H^1$ as $n\to\infty$}.
+    \]
+    Let
+    \[
+        \phi_n(t, x) = c_n(t)\alpha_n(x)\in\mc{D}_\sigma.
+    \]
+    By (a) we have
+    \[
+        -\int_0^s\bk{u}{\p_t\phi_n} + \int_0^s\bk{\nabla u}{\nabla\phi_n} + \int_0^s \bk{(u\cdot\nabla)u}{\phi_n} = \bk{u_0}{\phi_n(0)} - \bk{u(s)}{\phi_n(s)},
+    \]
+    thus we only need to pass the limit $n\to\infty$ in the equality.
+
+    It's easy to see
+    \begin{align*}
+        \p_t\phi_n\to\p_t\phi&\quad\text{in $L^2(0, s; L^2)$};\\
+        \phi_n\to\phi\quad&\quad\text{in $C(0, s; H^1)$},
+    \end{align*}
+    so there's no problem to pass the limit in linear terms. But the nonlinear term does not necessarily belong to $L^2(0, s; L^2)$, so we need lemma \ref{lemma: nonlinear term estimate}:
+    \begin{align*}
+        \abs{\int_0^s \bk{(u\cdot\nabla)u}{\phi_n-\phi}}&\leq\int_0^s\norm{(u\cdot\nabla)u}_{L^{6/5}}\norm{\phi_n-\phi}_{L^6}\\
+        &\leq\norm{(u\cdot\nabla)u}_{L^{4/3}(0, s; L^{6/5})}\norm{\phi_n-\phi}_{L^4(0, s; L^6)}\\
+        &\to 0\ (n\to\infty).
+    \end{align*}
+
+    Suppose (b) is true, next we show (a). Suppose $\phi\in\mc{D}_\sigma$. Then $\phi\in V$, so we can write
+    \[
+        \phi(t, x) = \sum_{k=1}^\infty c_k(t)a_k(x),
+    \]
+    where the sum is pointwise convergent in $t$, with respect to $H^1$ norm in $x$. 
+    
+    Let
+    \[
+        \phi_n(t, x) = \sum_{k=1}^n c_k(t)a_k(x)\in\tilde{\mc{D}}_\sigma,
+    \]
+    Since $c_k = \bk{\phi}{a_k}$, we conclude that $\set{c_k}\subset C_c^\infty([0, \infty))$, and they are uniformly bounded on $[0, s]$. Therefore,
+    \[
+        \phi_n\to\phi\quad\text{in $C(0, s; H^1)$}.
+    \]
+    Furthermore, 
+    \[
+        \p_t\phi_n\to\p_t\phi\quad\text{in $L^2(0, s; L^2)$},
+    \]
+    thus we can pass the limit $n\to\infty$ in the same way as we've done in (a).
+\end{proof}
+
+\section{Existence of the weak solutions}
+\label{sec: Galerkin}
+
+In this section, we will prove the main result of this note, which is the following theorem.
+
+\begin{theorem}[Hopf]
+    \label{thm: Hopf, exist weak sol}
+    For every given $u_0\in H(\Omega)$, there exists a global-in-time weak solution to the Navier--Stokes equations with initial condition $u_0$.
+\end{theorem}
+
+% \begin{remark}
+%     In general, the weak solution is not unique, which is proved by \cite{buckmaster2019nonuniqueness}.
+% \end{remark}
+
+The method by which we construct the weak solution is called \textbf{Galerkin method}, whose main idea is: 
+\begin{enumerate}[label=\arabic*.]
+    \item Construct a sequence of larger and larger finite dimensional space approximating the function space in which the original PDE is posed. Project the original PDE onto each finite-dimensional space.
+    \item Solve each projected equation by the existence theorem of ODE (since it's finite-dimensional) and get a sequence of approximate solutions.
+    \item Show all approximate solutions that exist globally in time.
+    \item Extract a subsequence of approximate solutions (in some suitable sense) and conclude that the limit is a solution to the original PDE.
+\end{enumerate}
+Next, we will follow these steps and apply the method to Navier--Stokes equation.
+
+\subsection*{Step 1: Project the equation onto some finite-dimensional spaces}
+
+Let $\set{a_j}$ be the eigenfunctions of the Stokes operator, which is an orthonormal Schauder basis of $H$. Let
+\[
+    P_n: (L^2)^3\mapsto P_nH:=\text{span}\set{a_1, \cdots, a_n},\quad u\mapsto\sum_{j=1}^n \bk{u}{a_j}a_j
+\]
+be the projection onto the space spanned by the first $n$ eigenfunctions. 
+
+\begin{proposition}
+    $P_n$ is self-adjoint, i.e.
+    \[
+        \bk{P_n u}{v} = \bk{u}{P_n v}\quad\text{for all $u, v\in (L^2)^3$}.
+    \]
+\end{proposition}
+
+\begin{proof}
+    Trivial computation.
+\end{proof}
+
+The operator $P_n$ could be thought of as the finite-dimensional approximation of the Leray operator $\mb{P}$. From this perspective, we can define approximate solutions $u_n$ of the Navier--Stokes equation.
+
+\begin{definition}
+    The $n$-th \textbf{Galerkin approximation} $u_n$ of the Navier Stokes equation with initial condition $u_0\in H$ is defined by the problem
+    \begin{equation}
+        \label{eq: Galerkin}
+        \p_t u_n + Au_n + P_n[(u_n\cdot\nabla)u_n] = 0,\quad u_n(0)=P_nu_0. 
+    \end{equation}
+    Here \eqref{eq: Galerkin} is called the $n$-th \textbf{Galerkin equation}.
+\end{definition}
+
+The Galerkin equation \eqref{eq: Galerkin} could be viewed as a finite-dimensional approximation of the projected Navier--Stokes equation \eqref{eq: projected NS}. 
+
+\subsection*{Step 2: Solve the projected equations for approximate solutions}
+
+Since $P_nH$ is finite-dimensional, the Galerkin equation could be viewed as an ODE in the space $P_nH$, and we naturally expect its solution exists, at least in a short time. We can write
+\begin{equation}
+    \label{eq: Galerkin solution, spectral decomposition}
+    u_n(t, x) = \sum_{j=1}^n c_{n, j}(t)a_j(x).
+\end{equation}
+Taking inner product of \eqref{eq: Galerkin} with $a_k$, substituting $u_n$ with \eqref{eq: Galerkin solution, spectral decomposition}, we obtain
+\begin{equation}
+    \label{eq: Galerkin ODE}
+    c_{n, k}'(t) = -\lambda_kc_{n, k}(t) - \sum_{i, j=1}^n \bk{(a_i\cdot\nabla)a_j}{a_k} c_{n, i}(t)c_{n, j}(t),\quad c_{n, k}(0) = \bk{u_0}{a_k}.
+\end{equation}
+\eqref{eq: Galerkin ODE} is an ODE of the vector $c_n := (c_{n, k})_{k=1}^n$, and we could check that the right-hand side is a locally Lipschitz function of $c_n$. Hence, by existence and uniqueness theorem of ODE, we conclude that there exists $0<T_n\leq\infty$ s.t. $c_n$ is defined in time $[0, T_n)$, which means $u_n$ exists in a short time.
+
+\subsection*{Step 3: Show that the approximate solutions exist globally in time}
+
+Next, we will show that $u_n$ is globally defined in time. Since
+\[
+    \norm{u_n(t)}^2 = \sum_{k=1}^n \abs{c_{n, k}(t)}^2,
+\]
+to show that $c_{n, k}$ doesn't blow up in finite time, we only need to show $\norm{u_n}$ will not blow up. Taking inner product of \eqref{eq: Galerkin} with $u_n$, the nonlinear term vanish:
+\[
+    \bk{P_n(u_n\cdot\nabla)u_n}{u_n} = \bk{(u_n\cdot\nabla)u_n}{Pu_n} = \bk{(u_n\cdot\nabla)u_n}{u_n} = 0;
+\]
+and the other two terms become
+\begin{align*}
+    \bk{\p_tu_n}{u_n} &= \f{1}{2}\dd{}{t}\norm{u_n(t)}^2,\\
+    \bk{Au_n}{u_n} &= \bk{-\mb{P}\laplace u_n}{u_n} = \bk{-\laplace u_n}{\mb{P}u_n} = \bk{-\laplace u_n}{u_n} = \norm{\nabla u_n}^2.
+\end{align*}
+Therefore, 
+\begin{equation*}
+    \f{1}{2}\dd{}{t}\norm{u_n(t)}^2 = -\norm{\nabla u_n(t)}^2 \leq 0,
+\end{equation*}
+which implies $\norm{u_n}$ is non-increasing in time, and thus will not blow up. Moreover, by integrating in time we conclude that for a.e. $s>0$,
+\begin{equation}
+    \label{eq: Galerkin, E-esitimate}
+    \f{1}{2}\norm{u_n(s)}^2 + \int_0^s\norm{\nabla u_n(t)}^2\dt = \f{1}{2}\norm{u_n(0)}^2\leq\f{1}{2}\norm{u_0}^2.
+\end{equation}
+
+\subsection*{Step 4: Extract a convergent subsequence of approximate solutions}
+
+For a test function $\phi(t, x)=\sum_{j=1}^{N}c_j(t)a_j(x)\in\tilde{\mc{D}}_\sigma$, by the definition of $u_n$ we can check that if $n>N$, we have
+\begin{equation}
+    \label{eq: Galerkin weak}
+    -\int_0^s\bk{u_n}{\p_t\phi} + \int_0^s\bk{\nabla u_n}{\nabla\phi} + \int_0^s \bk{(u_n\cdot\nabla)u_n}{\phi} = \bk{u_n(0)}{\phi(0)} - \bk{u_n(s)}{\phi(s)}.
+\end{equation}
+Hence, if we extract a convergent subsequence of $\set{u_n}$ (in a suitable sense) and let $n\to\infty$ in \eqref{eq: Galerkin weak}, then by theorem \ref{thm: equiv def of weak sol} we conclude that the limit of $u_n$ is a weak solution to Navier--Stokes equation. To figure out what kind of convergence can enable us to pass the limit, next we will examine \eqref{eq: Galerkin weak} term by term.
+
+Fixing $T>0$. Suppose we can extract a subsequence $\set{u_n}$ (which we relabel) s.t. 
+\begin{equation}
+    \label{eq: L^2 convergence}
+    u_n\to u\quad\text{in $L^2(0, T; L^2)$}.
+\end{equation}
+Moreover, if \eqref{eq: L^2 convergence} holds, we can extract a further subsequence $\set{u_{n}}$ (relabel again) s.t.
+\[
+    u_{n}(t)\to u_{n}(t)\quad\text{in $L^2$ for a.e. $t\in (0, T)$},
+\]
+we conclude that for a.e. $s\in (0, T)$,
+\[
+    \bk{u_n(0)}{\phi(0)}-\bk{u_n(s)}{\phi(s)}\to \bk{u_0}{\phi(0)}-\bk{u(s)}{u(s)}\quad (n\to\infty).
+\]
+Furthermore, by \eqref{eq: Galerkin, E-esitimate}, the sequence $\set{\nabla u_n}$ is bounded in $L^2(0, T; L^2)$ for all $T>0$. By reflexivity, we can extract a subsequence $\set{\nabla u_n}$ (which we relabel) s.t.
+\begin{equation}
+    \label{eq: weak conv of grad}
+    \text{$\nabla u_n\wto\nabla u$ weakly in $L^2(0, T; L^2)$ for all $T>0$}.
+\end{equation}
+Thus, for a.e. $s>0$,
+\[
+    \int_0^s\bk{\nabla u_n}{\nabla\phi}\to\int_0^s\bk{\nabla u}{\phi}.
+\]
+To summarize, the condition \eqref{eq: L^2 convergence} suffices for the linear part of \eqref{eq: Galerkin weak} to converge.
+
+Next, we seek conditions enabling the convergence of the nonlinear term in \eqref{eq: Galerkin weak}. Suppose \eqref{eq: L^2 convergence} holds. Notice that
+\[
+    (u_n\cdot\nabla u_n)u_n - (u\cdot\nabla u)u = (u_n-u)\cdot\nabla u_n - u\cdot\nabla (u_n-u).
+\]
+Hence, for $s\in (0, T)$, we have
+\begin{align*}
+    \abs{\int_0^s \bk{(u_n-u)\cdot\nabla u_n}{\phi}}&\leq C(\phi)\int_0^s\norm{u_n-u}\norm{\nabla u_n}\\
+    &\leq C(\phi)\left(\int_0^s\norm{u_n-u}^2\right)^{1/2}\left(\int_0^s\norm{\nabla u_n}^2\right)^{1/2}\\
+    &\leq C(\phi)\left(\f{1}{2}\norm{u_0}^2\right)^{1/2}\left(\int_0^s\norm{u_n-u}^2\right),
+\end{align*}
+(using \eqref{eq: Galerkin, E-esitimate} for the last inequality). On the other hand, by the weak converge of gradients in \eqref{eq: weak conv of grad}, we conclude that
+\[
+    u\cdot\nabla(u_n-u)\wto 0\quad\text{weakly in $L^2(0, T; L^2)$},
+\]
+thus for $s\in (0, T)$,
+\[
+    \int_0^s\bk{u\cdot\nabla(u_n-u)}{\phi}\to 0.
+\]
+Therefore, the nonlinear terms also satisfy
+\[
+    \int_0^s\bk{(u_n\cdot\nabla)u_n}{\phi}\to\int_0^s\bk{(u\cdot\nabla)u}{\phi}
+\]
+for $s\in (0, T).$
+
+Summing up all the discussions above, we conclude that extracting a subsequence $\set{u_n}$ satisfying \eqref{eq: L^2 convergence} is sufficient to complete the proof of theorem \ref{thm: Hopf, exist weak sol}. To prove the existence of such a subsequence, we need the following lemma.
+
+\begin{lemma}[Aubin--Lions]
+    \label{lemma: Aubin--Lions}
+    Suppose $p, q>1$, $T>0$. If a sequence $\set{u_n}$ satisfies
+    \begin{equation}
+        \label{eq: Aubin--Lions condition}
+        \norm{u_n}_{L^q(0, T; V)} + \norm{\p_tu_n}_{L^p(0, T; V^*)}\leq C\quad\text{for all $n\in\N$},
+    \end{equation}
+    where $C$ is independent of $n$, then $\set{u_n}$ has a subsequence converging strongly in $L^q(0, T; H)$.
+\end{lemma}
+
+\begin{proof}
+    1. Consider the finite-dimensional projector
+    \[
+        P_k u := \sum_{j=1}^k \bk{u}{a_j}a_j.
+    \]
+    For each $k$, we next try to extract a subsequence from $\set{P_ku_n}_{n\in\N}$ which converges in $C(0, T; H)$. We will do this by the Ascoli-Arzela theorem.
+    
+    Notice that each $\bk{u_n}{a_j}$ is absolutely continuous in time, with $\p_t\bk{u_n}{a_j}=\bk{\p_tu_n}{a_j}$ (here $\p_t$ is taken in weak sense).
+    Hence, for each $u_n$ and $a_j$, there exists $s_0\in [0, T]$ s.t.
+    \[
+        \bk{u_n(s_0)}{a_j} = \frac{1}{T}\int_0^T \bk{\p_t u_n}{a_j}\dt.
+    \]
+    Therefore, for every $s\in [0, T]$, we have
+    \begin{align*}
+        \abs{\bk{u(s)}{a_j}} &\leq\abs{\bk{u(s_0)}{a_j}} + \abs{\int_{s_0}^s \bk{\p_t u}{a_j}\dt}\\
+        &\leq \frac{1}{T}\int_0^T \norm{u(s)}\norm{a_j}\dt + \int_0^T \norm{\p_t u}_{V^*}\norm{a_j}_V\\
+        &\leq \frac{1}{T}\norm{u(s)}_{L^q(0, T; H)} T^{1-1/q} + \norm{\p_t u}_{L^p(0, T; V^*)}\lambda_j^{1/2}\\
+        &\leq C(1+\lambda_j^{1/2}),
+    \end{align*}
+    where $C$ is independent of $s$. Therefore,
+    \[
+        \norm{P_ku_n(s)}\leq\sum_{j=1}^k\abs{\bk{u_n(s)}{a_j}}
+        \leq C\sum_{j=1}^k (1+\lambda_j^{1/2}),
+    \]
+    which says $\set{P_ku_n}_{n\in\N}$ is uniformly bounded in $C(0, T; H)$ for every $k\in\N$.
+    
+    Next, we prove equicontinuity. For every $s, s'\in [0, T]$, we have
+    \begin{align*}
+        \norm{P_k u_n(s) - P_k u_n(s')}&\leq\sum_{j=1}^k\int_{s'}^s\abs{\bk{\p_tu_n}{a_j}}\dt\\
+        &\leq\sum_{j=1}^k\int_{s'}^s\norm{\p_tu_n}_{V^*}\norm{a_j}_V\dt\\
+        &\leq\sum_{j=1}^k\lambda_j^{1/2}\left(\int_{s'}^s\norm{\p_tu_n}_{V^*}^p\dt\right)^{1/p}\left(\int_{s'}^s\dt\right)^{1-1/p}\\
+        &\leq C_k\abs{s-s'}^{1-1/p},
+    \end{align*}
+    where we used \eqref{eq: Aubin--Lions condition} in the last line. Therefore, the sequence $\set{P_ku_n}_{n\in\N}$ is semicontinuous. Now we can use Ascoli-Arzela to extract a subsequence from $\set{P_ku_n}_{n\in\N}$ which converges in $C(0, T; H)$.
+    
+    2. By standard diagonal argument, we can extract a subsequence $\set{u_n}$ (which we relabel) s.t. $\set{P_ku_n}_{n\in\N}$ converges for every $k\in\N$. Next we will show this $\set{u_n}$ is a Cauchy sequence in $L^q(0, T; H)$. Let
+    \begin{equation}
+        Q_ku := \sum_{j=k+1}^\infty\bk{u}{a_j}a_j.
+    \end{equation}
+    By \eqref{eq: Aubin--Lions condition} and the fact that $\set{\lambda_j}$ is increasing,
+    \begin{align*}
+        C&\geq\int_0^T\norm{Q_ku_n}_V^q\dt
+        =\int_0^T\left(\sum_{j=k+1}^\infty\lambda_j\bk{u_n}{a_j}^2\right)^{q/2}\dt\\
+        &\geq\lambda_k^{q/2}\int_0^T\left(\sum_{j=k+1}^\infty\bk{u_n}{a_j}^2\right)^{q/2}\dt
+        =\lambda_k^{q/2}\norm{Q_ku_n}_{L^q(0, T; H)}^q.
+    \end{align*}
+    Since $\lambda_k\to\infty$, for every $\e>0$ we can choose $k$ sufficiently large s.t.
+    \[
+        \sup_n\norm{Q_ku_n}_{L^q(0, T; H)}<\e.
+    \]
+    Since $\set{P_ku_n}_{n\in\N}$ converges in $C(0, T; H)$ and hence in $L^q(0, T; H)$, we could find $N>0$ s.t.
+    \[
+        \sup_{n, m>N}\norm{P_ku_n-P_ku_m}_{L^q(0, T; H)}<\e.
+    \]
+    Therefore, for every $n, m>N$ we have
+    \[
+        \norm{u_n-u_m}_{L^q(0, T; H)}\leq\norm{P_ku_n-P_ku_m}_{L^q(0, T; H)} + \norm{Q_ku_n-Q_ku_m}_{L^q(0, T; H)}\leq 3\e,
+    \]
+    which says $\set{u_n}$ is Cauchy in ${L^q(0, T; H)}$.
+\end{proof}
+
+Now we attempt to use the lemma \ref{lemma: Aubin--Lions} with $q=2$. By \eqref{eq: Galerkin, E-esitimate} we have
+\[
+    \norm{u_n}_{L^2(0, T; V)}\leq C.
+\]
+Next we try to estimate $\norm{\p_t u_n}_{L^{p}(0, T; V^*)}$ for some suitable $p$. 
+
+Suppose $v\in V$. Taking inner product of \eqref{eq: Galerkin} with $v$ we obtain
+\[
+    \bk{\p_t u_n}{v} = - \bk{Au_n}{v} - \bk{P_n[(u_n\cdot\nabla)u_n]}{v}.
+\]
+The first term on right-hand side is easy to estimate:
+\begin{align*}
+    \abs{\bk{Au_n}{v}} &= \abs{\bk{-\mb{P}\laplace u_n}{v}} = \abs{\bk{-\laplace u_n}{\mb{P}v}} \\
+    &= \abs{\bk{-\laplace u_n}{v}} = \abs{\bk{\nabla u_n}{\nabla v}}\leq\norm{\nabla u_n}\norm{v}_V.
+\end{align*}
+By $L^2$-$L^3$-$L^6$ H\"older inequality, Lebesgue interpolation $\norm{u}_{L^3}\leq\norm{u}_{L^2}^{1/2}\norm{u}_{L^6}^{1/2}$ and Sobolev embedding $H_0^1\hookrightarrow L^6$, we have
+\begin{align*}
+    \abs{\bk{P_n[(u_n\cdot\nabla)u_n]}{v}} &= \abs{\bk{(u_n\cdot\nabla)u_n}{P_nv}}\\
+    &\leq\norm{u_n}_{L^3}\cdot\norm{\nabla u_n}_{L^2}\cdot\norm{P_nv}_{L^6}\\
+    &\leq C\norm{u_n}_{L^2}^{1/2}\cdot\norm{u_n}_{L^6}^{1/2}\cdot\norm{\nabla u_n}_{L^2}\cdot\norm{P_nv}_V\\
+    &\leq C\norm{u_n}_{L^2}^{1/2}\cdot\norm{\nabla u_n}_{L^2}^{3/2}\cdot\norm{v}_V.
+\end{align*}
+Therefore,
+\[
+    \norm{\p_t u_n}_{V^*}\leq\norm{\nabla u_n} + C\norm{u_n}^{1/2}\cdot\norm{\nabla u_n}^{3/2}.
+\]
+In order to take advantage of the inequality \eqref{eq: Galerkin, E-esitimate}, we try to estimate $\norm{\p_t u_n}_{L^{4/3}(0, T; V^*)}$:
+\begin{align*}
+    \int_0^T \norm{\p_t u_n}_{V^*}^{4/3}&\leq C\int_0^T\norm{\nabla u_n}^{4/3} + C\int_0^T\norm{u_n}^{2/3}\cdot\norm{\nabla u_n}^{2}\\
+    &\leq CT^{1/3}\norm{\nabla u_n}_{L^2(0, T; L^2)} + C\norm{u_n}_{L^\infty(0, T; L^2)}^{2/3}\norm{\nabla u_n}_{L^2(0, T; L^2)}\\
+    &\leq CT^{1/3}\norm{u_0}^{4/3} + C\norm{u_0}^{8/3}.
+\end{align*}
+
+Therefore, we can apply Aubin--Lions lemma with $q=2,\ p=4/3$ and extract a subsequence from $\set{u_n}$ which converges in $L^2(0, T; L^2)$, and finally complete the proof of theorem \ref{thm: Hopf, exist weak sol}.
+
+\bibliographystyle{unsrt}
+\bibliography{ref.bib}
+
+\end{document}
