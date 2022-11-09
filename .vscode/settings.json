@@ -1,0 +1,16 @@
+{
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "pdflatexmk",
+            "tools": [
+                "pdflatexmk",
+            ]
+        },
+    ],
+    "grammarly.selectors": [
+        {
+            "language": "latex",
+            "scheme": "file"
+        }
+    ]
+}

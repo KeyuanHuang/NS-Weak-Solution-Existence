@@ -1,0 +1,13 @@
+Keyuan
+Weyl
+Ascoli-Arzela
+Leray
+PDE
+Schauder
+surjective
+Sobolev
+Hölder
+pointwise
+Galerkin
+equicontinuity
+Aubin
